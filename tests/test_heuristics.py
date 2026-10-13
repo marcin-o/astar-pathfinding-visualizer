@@ -3,15 +3,12 @@ import math
 import pytest
 
 from algorithms.grid_graph import GridGraph
-from algorithms.heuristics import (
-    ADMISSIBLE_HEURISTICS,
-    HEURISTICS,
-    INFLATION_FACTOR,
-    euclidean_distance,
-    inflated_manhattan_distance,
-    manhattan_distance,
-)
+from algorithms.heuristics import EUCLIDEAN, HEURISTICS, MANHATTAN, euclidean_distance, manhattan_distance
 from grid_maps import breadth_first_distances, parse_grid
+
+
+def test_only_manhattan_and_euclidean_heuristics_are_available():
+    assert HEURISTICS == {MANHATTAN: manhattan_distance, EUCLIDEAN: euclidean_distance}
 
 
 def test_manhattan_distance_sums_row_and_column_differences():
@@ -22,10 +19,6 @@ def test_manhattan_distance_sums_row_and_column_differences():
 def test_euclidean_distance_is_straight_line_length():
     assert euclidean_distance((0, 0), (3, 4)) == 5
     assert euclidean_distance((1, 1), (2, 2)) == pytest.approx(math.sqrt(2))
-
-
-def test_inflated_manhattan_multiplies_manhattan_distance():
-    assert inflated_manhattan_distance((0, 0), (3, 4)) == INFLATION_FACTOR * 7
 
 
 @pytest.mark.parametrize("heuristic", HEURISTICS.values(), ids=HEURISTICS.keys())
@@ -41,9 +34,16 @@ def test_euclidean_never_exceeds_manhattan():
         assert euclidean_distance(cell, (2, 3)) <= manhattan_distance(cell, (2, 3))
 
 
-@pytest.mark.parametrize("name", ADMISSIBLE_HEURISTICS)
-def test_admissible_heuristics_never_overestimate_real_distance(name):
-    heuristic = HEURISTICS[name]
+def test_manhattan_equals_real_distance_on_open_grid():
+    graph = GridGraph(6, 8)
+    goal = (5, 7)
+
+    for cell, real_distance in breadth_first_distances(graph, goal).items():
+        assert manhattan_distance(cell, goal) == real_distance
+
+
+@pytest.mark.parametrize("heuristic", HEURISTICS.values(), ids=HEURISTICS.keys())
+def test_heuristic_never_overestimates_real_distance(heuristic):
     graph, _, goal = parse_grid(
         """
         S...#....
@@ -56,12 +56,3 @@ def test_admissible_heuristics_never_overestimate_real_distance(name):
 
     for cell, real_distance in breadth_first_distances(graph, goal).items():
         assert heuristic(cell, goal) <= real_distance
-
-
-def test_inflated_heuristic_overestimates_on_open_grid():
-    graph = GridGraph(5, 5)
-    goal = (4, 4)
-
-    real_distances = breadth_first_distances(graph, goal)
-
-    assert inflated_manhattan_distance((0, 0), goal) > real_distances[(0, 0)]

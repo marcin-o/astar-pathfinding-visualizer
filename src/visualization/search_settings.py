@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from algorithms.astar import a_star
 from algorithms.dijkstra import dijkstra
-from algorithms.heuristics import ADMISSIBLE_HEURISTICS, HEURISTICS
+from algorithms.heuristics import EUCLIDEAN, HEURISTICS, MANHATTAN
 from algorithms.search_result import SearchResult
 from visualization.board import Board
 
@@ -14,15 +14,11 @@ HEURISTIC_NAMES = tuple(HEURISTICS)
 @dataclass(frozen=True)
 class SearchSettings:
     algorithm: str = A_STAR
-    heuristic_name: str = HEURISTIC_NAMES[0]
+    heuristic_name: str = MANHATTAN
 
     @property
     def uses_heuristic(self) -> bool:
         return self.algorithm == A_STAR
-
-    @property
-    def heuristic_is_admissible(self) -> bool:
-        return self.heuristic_name in ADMISSIBLE_HEURISTICS
 
     @property
     def label(self) -> str:
@@ -42,4 +38,8 @@ class SearchSettings:
         return dijkstra(graph, board.start, board.goal)
 
 
-ALL_SETTINGS = tuple(SearchSettings(A_STAR, name) for name in HEURISTIC_NAMES) + (SearchSettings(DIJKSTRA),)
+ALL_SETTINGS = (
+    SearchSettings(DIJKSTRA),
+    SearchSettings(A_STAR, EUCLIDEAN),
+    SearchSettings(A_STAR, MANHATTAN),
+)

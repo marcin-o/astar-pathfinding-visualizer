@@ -38,9 +38,10 @@ Repozytorium zawiera interaktywną wizualizację pokazującą:
 
 Wizualizacja zawiera:
 
-- odległość Manhattan – `|Δwiersz| + |Δkolumna|`, dokładnie odpowiada ruchowi w 4 kierunkach,
-- odległość euklidesową – `√(Δwiersz² + Δkolumna²)`, dopuszczalna, ale słabiej poinformowana (zaniża koszt bardziej niż Manhattan),
-- Manhattan ×3 – heurystyka **niedopuszczalna** (przeszacowuje koszt); pokazuje, że A* traci wtedy gwarancję znalezienia najkrótszej drogi.
+- odległość Manhattan – `|Δx| + |Δy|`, na planszy bez przeszkód równa rzeczywistej długości drogi przy ruchu w 4 kierunkach,
+- odległość euklidesową – `√(Δx² + Δy²)`, słabiej poinformowana (zaniża koszt bardziej niż Manhattan).
+
+Żadna z nich nie przeszacowuje odległości do celu, dlatego A* z każdą z nich znajduje ścieżkę tej samej, minimalnej długości co Dijkstra.
 
 ## Technologie
 
@@ -84,9 +85,9 @@ Okno ma rozdzielczość 1280×720. Klawisz **F** przełącza tryb pełnoekranowy
 | **Spacja** | uruchomienie algorytmu / pauza / wznowienie |
 | **Enter** | pominięcie animacji i pokazanie wyniku od razu |
 | **A** / **D** | wybór algorytmu: A* / Dijkstra |
-| **H** | zmiana heurystyki A* (Manhattan → euklidesowa → Manhattan ×3) |
+| **H** | zmiana heurystyki A* (Manhattan ↔ euklidesowa); gdy wybrana jest Dijkstra – przejście do A* |
 | **+** / **−** (lub **↑** / **↓**) | prędkość animacji |
-| **P** | porównanie wszystkich wariantów na bieżącej planszy (bez animacji) |
+| **P** | porównanie wariantów na bieżącej planszy (bez animacji): Dijkstra, A* euklidesowa, A* Manhattan |
 | **C** | wyczyszczenie wyniku (przeszkody zostają) |
 | **R** | wyczyszczenie całej planszy |
 | **L** | losowe przeszkody |
@@ -103,7 +104,7 @@ Skrót sterowania jest zawsze widoczny na dole okna.
 - **Dijkstra** wybiera wierzchołek o najmniejszym `g(n)` – jest to A* z `h(n) = 0`, dlatego rozchodzi się równomiernie we wszystkich kierunkach.
 - Algorytm wykonuje się w całości, zapisując kolejne kroki: który wierzchołek został zdjęty z kolejki i które wierzchołki trafiły do zbioru kandydatów. Animacja odtwarza te kroki z wybraną prędkością, a na końcu rysuje znalezioną ścieżkę.
 - **Odwiedzone wierzchołki** to wierzchołki zdjęte z kolejki i przeanalizowane (łącznie ze startem i celem). **Długość ścieżki** to liczba ruchów od startu do celu.
-- Tabela **Porównanie** zbiera wyniki kolejnych uruchomień na tej samej planszy. Ścieżka dłuższa od najkrótszej w tabeli jest wyróżniona na czerwono. Każda zmiana planszy czyści tabelę.
+- Tabela **Porównanie** zbiera wyniki uruchomień na tej samej planszy w kolejności: Dijkstra, A* z heurystyką euklidesową, A* z heurystyką Manhattan – od braku heurystyki do coraz lepszego oszacowania. Długość ścieżki jest we wszystkich wariantach taka sama, różni się liczba odwiedzonych wierzchołków. Każda zmiana planszy czyści tabelę.
 - Jeżeli wynik jest widoczny, edycja planszy (przeszkody, przesunięcie startu lub celu) od razu przelicza i pokazuje nowy wynik.
 - Jeżeli cel jest nieosiągalny, na planszy pojawia się komunikat **BRAK ŚCIEŻKI**.
 
@@ -124,8 +125,8 @@ Skrót sterowania jest zawsze widoczny na dole okna.
 
 1. Na pustej planszy narysuj ścianę między startem a celem i uruchom A* (**Spacja**).
 2. Przełącz na Dijkstrę (**D**) i uruchom ponownie – porównaj obszar i liczbę odwiedzonych wierzchołków.
-3. Naciśnij **P**, aby zobaczyć w tabeli wszystkie warianty, także heurystykę euklidesową.
-4. Wygeneruj labirynt (**M**), wybierz heurystykę Manhattan ×3 (**H**) i naciśnij **P** – zwykle odwiedza najmniej wierzchołków, ale jej ścieżka bywa dłuższa od optymalnej (wyróżniona na czerwono; jeśli nie jest, wygeneruj kolejny labirynt).
+3. Wróć do A* (**A**), przełącz heurystykę na euklidesową (**H**), uruchom ponownie i porównaj kształt przeszukanego obszaru.
+4. Naciśnij **P** – tabela pokaże Dijkstrę, A* z heurystyką euklidesową i A* z heurystyką Manhattan: ścieżka ma tę samą długość, a liczba odwiedzonych wierzchołków zwykle maleje.
 5. Zamknij przejście do celu przeszkodami – program pokaże brak ścieżki.
 
 ## Testy

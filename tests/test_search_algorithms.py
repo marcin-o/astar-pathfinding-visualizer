@@ -6,16 +6,16 @@ import pytest
 from algorithms.astar import a_star
 from algorithms.dijkstra import dijkstra
 from algorithms.grid_graph import GridGraph
-from algorithms.heuristics import euclidean_distance, inflated_manhattan_distance, manhattan_distance
+from algorithms.heuristics import euclidean_distance, manhattan_distance
 from grid_maps import assert_valid_path, breadth_first_distances, parse_grid
 
-OPTIMAL_SEARCHES = {
+SEARCHES = {
     "dijkstra": dijkstra,
     "a_star_manhattan": partial(a_star, heuristic=manhattan_distance),
     "a_star_euclidean": partial(a_star, heuristic=euclidean_distance),
 }
 
-optimal_searches = pytest.mark.parametrize("search", OPTIMAL_SEARCHES.values(), ids=OPTIMAL_SEARCHES.keys())
+all_searches = pytest.mark.parametrize("search", SEARCHES.values(), ids=SEARCHES.keys())
 
 MAP_WITH_DETOUR = """
     .....
@@ -46,7 +46,7 @@ def random_graph(seed: int, rows: int = 15, cols: int = 20, wall_density: float 
     return GridGraph(rows, cols, frozenset(walls - {(0, 0), (rows - 1, cols - 1)}))
 
 
-@optimal_searches
+@all_searches
 def test_finds_straight_path_on_open_grid(search):
     graph, start, goal = parse_grid("S....G")
 
@@ -56,7 +56,7 @@ def test_finds_straight_path_on_open_grid(search):
     assert result.path_length == 5
 
 
-@optimal_searches
+@all_searches
 def test_goes_around_obstacle(search):
     graph, start, goal = parse_grid(MAP_WITH_DETOUR)
 
@@ -66,7 +66,7 @@ def test_goes_around_obstacle(search):
     assert result.path_length == 4
 
 
-@optimal_searches
+@all_searches
 def test_finds_shortest_path_through_maze(search):
     graph, start, goal = parse_grid(MAP_WITH_MAZE)
 
@@ -76,7 +76,7 @@ def test_finds_shortest_path_through_maze(search):
     assert result.path_length == breadth_first_distances(graph, start)[goal]
 
 
-@optimal_searches
+@all_searches
 def test_reports_missing_path_after_exploring_reachable_area(search):
     graph, start, goal = parse_grid(MAP_WITHOUT_PATH)
 
@@ -88,7 +88,7 @@ def test_reports_missing_path_after_exploring_reachable_area(search):
     assert result.visited_count == 6
 
 
-@optimal_searches
+@all_searches
 def test_start_equal_to_goal_gives_zero_length_path(search):
     graph = GridGraph(4, 4)
 
@@ -99,7 +99,7 @@ def test_start_equal_to_goal_gives_zero_length_path(search):
     assert result.visited_count == 1
 
 
-@optimal_searches
+@all_searches
 def test_each_cell_is_visited_at_most_once(search):
     graph = random_graph(seed=7)
 
@@ -146,21 +146,3 @@ def test_more_informed_heuristic_visits_fewer_cells():
 
     assert manhattan_result.visited_count <= euclidean_result.visited_count
 
-
-def test_inflated_heuristic_can_return_longer_path():
-    graph, start, goal = parse_grid(
-        """
-        .......
-        #...#..
-        S.#.#.G
-        .......
-        .......
-        """
-    )
-
-    optimal = dijkstra(graph, start, goal)
-    inflated = a_star(graph, start, goal, inflated_manhattan_distance)
-
-    assert_valid_path(graph, inflated.path, start, goal)
-    assert optimal.path_length == 8
-    assert inflated.path_length > optimal.path_length

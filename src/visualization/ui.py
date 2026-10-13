@@ -1,5 +1,6 @@
 import pygame
 
+from algorithms.heuristics import EUCLIDEAN, MANHATTAN
 from algorithms.search_result import SearchResult
 from visualization import theme
 from visualization.animation import SearchAnimation
@@ -9,6 +10,11 @@ PADDING = 16
 ROW_HEIGHT = 26
 NOTE_HEIGHT = 21
 TABLE_ROW_HEIGHT = 24
+
+HEURISTIC_FORMULAS = {
+    MANHATTAN: "h(n) = |Δx| + |Δy|",
+    EUCLIDEAN: "h(n) = √(Δx² + Δy²)",
+}
 
 LEGEND_ITEMS = (
     (theme.START, "Start (S)"),
@@ -58,8 +64,8 @@ class PanelWriter:
         self.text(self.fonts.body_bold, value, value_color, topright=(self.right, self.y))
         self.y += ROW_HEIGHT
 
-    def note(self, text: str, color=theme.MUTED_TEXT) -> None:
-        self.text(self.fonts.small, text, color, topright=(self.right, self.y))
+    def note(self, text: str) -> None:
+        self.text(self.fonts.small, text, theme.MUTED_TEXT, topright=(self.right, self.y))
         self.y += NOTE_HEIGHT
 
     def status(self, text: str, color) -> None:
@@ -89,12 +95,8 @@ def draw_settings_section(writer: PanelWriter, settings: SearchSettings, steps_p
     writer.row("Algorytm", settings.algorithm)
     if settings.uses_heuristic:
         writer.note("f(n) = g(n) + h(n)")
-        heuristic_color = theme.TEXT if settings.heuristic_is_admissible else theme.DANGER
-        writer.row("Heurystyka", settings.heuristic_name, heuristic_color)
-        if settings.heuristic_is_admissible:
-            writer.note("dopuszczalna")
-        else:
-            writer.note("niedopuszczalna!", theme.DANGER)
+        writer.row("Heurystyka", settings.heuristic_name)
+        writer.note(HEURISTIC_FORMULAS[settings.heuristic_name])
     else:
         writer.note("f(n) = g(n)")
         writer.row("Heurystyka", "brak", theme.MUTED_TEXT)
@@ -148,14 +150,11 @@ def draw_comparison_section(writer: PanelWriter, comparison: dict[str, SearchRes
     compared = [(settings.label, comparison[settings.label]) for settings in ALL_SETTINGS if settings.label in comparison]
     if not compared:
         writer.text(writer.fonts.small, "Uruchom kilka wariantów lub naciśnij P", theme.MUTED_TEXT, topleft=(writer.left, writer.y))
-    shortest = min((result.path_length for _, result in compared if result.path_found), default=None)
     for label, result in compared:
-        is_longer_than_shortest = result.path_found and result.path_length > shortest
-        path_color = theme.DANGER if is_longer_than_shortest else theme.TEXT
         path_text = str(result.path_length) if result.path_found else "brak"
         writer.text(writer.fonts.body, label, theme.TEXT, topleft=(writer.left, writer.y))
         writer.text(writer.fonts.body_bold, str(result.visited_count), theme.TEXT, topright=(visited_column, writer.y))
-        writer.text(writer.fonts.body_bold, path_text, path_color, topright=(writer.right, writer.y))
+        writer.text(writer.fonts.body_bold, path_text, theme.TEXT, topright=(writer.right, writer.y))
         writer.y += TABLE_ROW_HEIGHT
     writer.y = table_top + len(ALL_SETTINGS) * TABLE_ROW_HEIGHT
 
