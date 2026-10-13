@@ -1,20 +1,47 @@
 # A* Pathfinding Visualizer
 
-A visualization of the A* pathfinding algorithm created as part of the
-"Graphs and Their Applications" course.
+Projekt realizowany w ramach przedmiotu **„Grafy i ich zastosowania”**.
 
-## Project goals
+## Temat
 
-- implement the A* algorithm
-- visualize the pathfinding process
-- compare A* with Dijkstra's algorithm
-- demonstrate the impact of different heuristics
+**Algorytm A* i jego zastosowania**
 
-## Topics
+Projekt towarzyszy referatowi trwającemu 25 minut, po którym przewidziane jest 5 minut na pytania i dyskusję.
 
-- shortest path problem
-- A* algorithm
-- Dijkstra's algorithm
-- heuristic functions
-- Manhattan distance
-- Euclidean distance
+## Zakres
+
+Projekt obejmuje:
+
+- wyszukiwanie najkrótszej ścieżki z wykorzystaniem funkcji heurystycznej,
+- algorytm A*,
+- porównanie algorytmu A* z algorytmem Dijkstry,
+- wpływ jakości heurystyki na działanie algorytmu,
+- warunki gwarantujące znalezienie najkrótszej drogi,
+- zastosowania algorytmu A* w:
+    - nawigacji,
+    - planowaniu tras,
+    - robotyce,
+    - grach komputerowych.
+
+## Część praktyczna
+
+Repozytorium zawiera interaktywną wizualizację pokazującą:
+
+- działanie algorytmu A*,
+- działanie algorytmu Dijkstry jako punkt odniesienia,
+- odwiedzane wierzchołki,
+- końcową najkrótszą ścieżkę,
+- różnice w liczbie odwiedzonych wierzchołków,
+- działanie różnych funkcji heurystycznych.
+
+## Heurystyki
+
+Wizualizacja będzie zawierać co najmniej:
+
+- odległość Manhattan,
+- odległość euklidesową.
+
+## Technologie
+
+- Python
+- Pygame
